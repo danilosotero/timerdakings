@@ -137,8 +137,14 @@
         .btn-limpar-dado { background: var(--gray); color: black; }
         .btn-time-a { background: var(--blue); color: white; }
         .btn-time-b { background: var(--red); color: white; }
-        .btn-hide { background: var(--gray); color: black; }
-        .btn-reset-cartas { background: var(--gray); color: black; width: 100%; }
+        .btn-hide { background: var(--gray); color: black; width: auto; }
+        .btn-toggle-section {
+            background: var(--gray);
+            color: black;
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            height: fit-content;
+        }
 
         .info-box {
             background: #222;
@@ -175,20 +181,36 @@
             margin-top: 0;
         }
 
-        /* Novo estilo para exibição do dado */
-        .dado {
+        /* Estilo para seções colapsáveis */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            border-bottom: 1px solid var(--gray);
+            padding-bottom: 5px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+        }
+
+        .section-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            max-height: 500px;
+        }
+
+        .section-content.collapsed {
+            max-height: 0;
+            margin: 0;
+            padding: 0;
+            opacity: 0;
+        }
+
+        .section-footer {
+            margin-top: 10px;
             text-align: center;
-        }
-
-        .dado-imagem {
-            margin-top: 10px;
-        }
-
-        .resultado-dado {
-            margin-top: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--accent-color);
         }
 
         @media (max-width: 600px) {
@@ -249,42 +271,52 @@
     </div>
 
     <!-- Sorteio do Dado -->
-    <div class="dado">
-        <h2>Sorteio do Dado</h2>
-        <div class="controls">
-            <button class="btn-dado" onclick="sortearDado()">Sortear Dado</button>
-            <button class="btn-limpar-dado" onclick="limparDado()">Limpar Dado</button>
+    <div class="dado-section">
+        <div class="section-header">
+            <h2>Sorteio do Dado</h2>
+            <button class="btn-toggle-section" onclick="toggleSection('dado')">Ocultar</button>
         </div>
-        <div class="dado-imagem" id="imagem-dado"></div>
-        <div class="resultado-dado" id="resultado-dado"></div>
+        <div class="section-content" id="dado-section-content">
+            <div class="controls">
+                <button class="btn-dado" onclick="sortearDado()">Sortear Dado</button>
+                <button class="btn-limpar-dado" onclick="limparDado()">Limpar Dado</button>
+            </div>
+            <div class="dado-imagem" id="imagem-dado"></div>
+            <div class="resultado-dado" id="resultado-dado"></div>
+        </div>
     </div>
 
     <!-- Cartas Secretas -->
-    <div class="cartas">
-        <h2>Cartas Secretas</h2>
-        <div class="sorteio-cartas controls">
-            <button class="btn-time-a" onclick="sortearCartaTime('a')">Sortear Time A</button>
-            <button class="btn-time-b" onclick="sortearCartaTime('b')">Sortear Time B</button>
-            <button class="btn-hide" onclick="toggleCartaTime('a')">Esconder Time A</button>
-            <button class="btn-hide" onclick="toggleCartaTime('b')">Esconder Time B</button>
-            <button class="btn-reset-cartas" onclick="resetCartasSecretas()">Limpar Cartas</button>
+    <div class="cartas-section">
+        <div class="section-header">
+            <h2>Cartas Secretas</h2>
+            <button class="btn-toggle-section" onclick="toggleSection('cartas')">Ocultar</button>
         </div>
-
-        <div class="cartas-container" id="cartas-exibicao">
-            <!-- Time A -->
-            <div class="carta-box" id="carta-box-a">
-                <h3>Time A</h3>
-                <p><strong>Carta Secreta:</strong></p>
-                <p id="carta-time-a">-</p>
-                <div id="carta-img-a"></div>
+        <div class="section-content" id="cartas-section-content">
+            <div class="sorteio-cartas controls">
+                <button class="btn-time-a" onclick="sortearCartaTime('a')">Sortear Time A</button>
+                <button class="btn-time-b" onclick="sortearCartaTime('b')">Sortear Time B</button>
+                <button class="btn-hide" onclick="toggleCartaTime('a')">Esconder Time A</button>
+                <button class="btn-hide" onclick="toggleCartaTime('b')">Esconder Time B</button>
+                <button class="btn-reset-cartas" onclick="resetCartasSecretas()">Limpar Cartas</button>
             </div>
 
-            <!-- Time B -->
-            <div class="carta-box" id="carta-box-b">
-                <h3>Time B</h3>
-                <p><strong>Carta Secreta:</strong></p>
-                <p id="carta-time-b">-</p>
-                <div id="carta-img-b"></div>
+            <div class="cartas-container" id="cartas-exibicao">
+                <!-- Time A -->
+                <div class="carta-box" id="carta-box-a">
+                    <h3>Time A</h3>
+                    <p><strong>Carta Secreta:</strong></p>
+                    <p id="carta-time-a">-</p>
+                    <div id="carta-img-a"></div>
+                </div>
+
+                <!-- Time B -->
+                <div class="carta-box" id="carta-box-b">
+                    <h3>Time B</h3>
+                    <p><strong>Carta Secreta:</strong></p>
+                    <p id="carta-time-b">-</p>
+                    <div id="carta-img-b"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -337,27 +369,23 @@
                 updateMainDisplay();
             }, 1000);
         }
-
         startExtraTimer();
     }
 
     function pauseTimers() {
         clearInterval(intervalMain);
         intervalMain = null;
-
         clearInterval(intervalExtra);
         intervalExtra = null;
     }
 
     function resetTimers() {
         pauseTimers();
-        totalSeconds = 0;
+
+        selecionarTempo(tempoSelecionado); // Mantém o tempo selecionado
+        updateMainDisplay(); // Define o tempo inicial correto
         extraSeconds = 0;
-        updateMainDisplay();
         updateExtraDisplay();
-        selecionarTempo('1');
-        document.getElementById("evento-atual").textContent = "Evento Atual: Escalonado";
-        document.getElementById("tipo-evento").innerHTML = "<strong>Tipo:</strong> Entrada progressiva";
         limparDado();
     }
 
@@ -480,8 +508,8 @@
         }, 10);
     }
 
-    // === Controle de Tempo ===
-    let tempoSelecionado = "1"; // Padrão: Tempo 1
+    // === Controle de Tempo e Início ===
+    let tempoSelecionado = "1";
 
     function selecionarTempo(tempo) {
         tempoSelecionado = tempo;
@@ -489,10 +517,17 @@
         document.querySelectorAll(".btn-tempo").forEach(btn => btn.classList.remove("ativo"));
         document.getElementById("btn-tempo" + tempo).classList.add("ativo");
 
+        if (tempo === "1") {
+            totalSeconds = 0;
+        } else if (tempo === "2") {
+            totalSeconds = 1200; // 20:00 minutos
+        }
+
+        updateMainDisplay();
         atualizarEvento();
     }
 
-    // === Lógica de Eventos e Tempos ===
+    // === Lógica de Eventos ===
     function atualizarEvento() {
         const tempoMin = Math.floor(totalSeconds / 60);
 
@@ -519,6 +554,28 @@
                 document.getElementById("evento-atual").textContent = "Evento Atual: Shoot-Out";
                 document.getElementById("tipo-evento").innerHTML = "<strong>Tipo:</strong> Decisivo";
             }
+        }
+    }
+
+    // === Toggle Sections (Mostrar/Ocultar Seções) ===
+    function toggleSection(section) {
+        const sectionContent = document.getElementById(`${section}-section-content`);
+        const btn = event.target;
+        const isCollapsed = sectionContent.classList.contains("collapsed");
+
+        // Remove todas as classes atuais para redefinir
+        sectionContent.classList.remove("collapsed");
+        if (isCollapsed) {
+            sectionContent.style.maxHeight = "500px";
+            btn.textContent = "Ocultar";
+        } else {
+            sectionContent.style.maxHeight = "0";
+            btn.textContent = "Mostrar";
+        }
+
+        // Reaplica a classe após ajuste
+        if (!isCollapsed) {
+            sectionContent.classList.add("collapsed");
         }
     }
 
