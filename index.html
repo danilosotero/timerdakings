@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Kings League Timer</title>
+    <style>
+        :root {
+            --bg-color: #111;
+            --text-color: #fff;
+            --accent-color: #0f0;
+            --accent-hover: #0ff;
+            --danger-color: #f33;
+            --gray: #888;
+            --blue: #39f;
+            --red: #f33;
+            --active-color: #0f0;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* Layout flexível para cronômetros */
+        .timer-group {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .timer-box {
+            flex: 1;
+            min-width: 250px;
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 3rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .tempo-seletor {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-tempo {
+            flex: 1;
+            padding: 10px;
+            font-size: 1rem;
+            border: 2px solid var(--gray);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-tempo.ativo {
+            background-color: var(--accent-color);
+            color: black;
+            border-color: var(--accent-color);
+        }
+
+        .evento-topo {
+            background: #222;
+            border-left: 5px solid var(--blue);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .evento-topo h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--accent-color);
+        }
+
+        .evento-topo p {
+            margin: 5px 0 0 0;
+            font-size: 1rem;
+            color: var(--gray);
+        }
+
+        .controls,
+        .dado,
+        .sorteio-cartas {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        button {
+            padding: 8px 12px;
+            font-size: 0.95rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-play { background: var(--accent-color); color: black; }
+        .btn-pause { background: #ffaa00; }
+        .btn-reset { background: #aaa; color: black; }
+        .btn-acrescimo { background: #444; color: white; }
+        .btn-dado { background: var(--danger-color); color: white; }
+        .btn-limpar-dado { background: var(--gray); color: black; }
+        .btn-time-a { background: var(--blue); color: white; }
+        .btn-time-b { background: var(--red); color: white; }
+        .btn-hide { background: var(--gray); color: black; }
+        .btn-reset-cartas { background: var(--gray); color: black; width: 100%; }
+
+        .info-box {
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .cartas-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .carta-box {
+            flex: 1;
+            min-width: 250px;
+            background: #222;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .carta-box img,
+        .dado-imagem img {
+            margin-top: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .carta-box h3 {
+            margin-top: 0;
+        }
+
+        /* Novo estilo para exibição do dado */
+        .dado {
+            text-align: center;
+        }
+
+        .dado-imagem {
+            margin-top: 10px;
+        }
+
+        .resultado-dado {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 600px) {
+            .timer-display {
+                font-size: 2.5rem;
+            }
+            .timer-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Kings League Timer</h1>
+
+    <!-- Barra de Evento Atual -->
+    <div class="evento-topo">
+        <h2 id="evento-atual">Evento Atual: Escalonado</h2>
+        <p id="tipo-evento"><strong>Tipo:</strong> Entrada progressiva</p>
+
+        <!-- Botões de Tempo Abaixo do Evento -->
+        <div class="tempo-seletor">
+            <button id="btn-tempo1" class="btn-tempo ativo" onclick="selecionarTempo('1')">Tempo 1</button>
+            <button id="btn-tempo2" class="btn-tempo" onclick="selecionarTempo('2')">Tempo 2</button>
+        </div>
+    </div>
+
+    <!-- Dois Cronômetros -->
+    <div class="timer-group">
+        <!-- Cronômetro Principal -->
+        <div class="timer-box">
+            <h2>Cronômetro Geral</h2>
+            <div class="timer-display" id="display-main">00:00</div>
+            <div class="controls">
+                <button class="btn-play" onclick="startTimers()">Play</button>
+                <button class="btn-pause" onclick="pauseTimers()">Pause</button>
+                <button class="btn-reset" onclick="resetTimers()">Reset</button>
+            </div>
+        </div>
+
+        <!-- Cronômetro de Acréscimo -->
+        <div class="timer-box">
+            <h2>Acréscimo</h2>
+            <div class="timer-display" id="display-extra">00:00</div>
+            <div class="acrescimos">
+                <div class="acrescimo-buttons controls">
+                    <button class="btn-acrescimo" onclick="addExtraTime(60)">+1 min</button>
+                    <button class="btn-acrescimo" onclick="addExtraTime(120)">+2 min</button>
+                    <button class="btn-acrescimo" onclick="addExtraTime(180)">+3 min</button>
+                    <button class="btn-acrescimo" onclick="addExtraTime(240)">+4 min</button>
+                </div>
+                <button class="btn-reset-extra" onclick="resetExtraTimer()">Reset Acréscimo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sorteio do Dado -->
+    <div class="dado">
+        <h2>Sorteio do Dado</h2>
+        <div class="controls">
+            <button class="btn-dado" onclick="sortearDado()">Sortear Dado</button>
+            <button class="btn-limpar-dado" onclick="limparDado()">Limpar Dado</button>
+        </div>
+        <div class="dado-imagem" id="imagem-dado"></div>
+        <div class="resultado-dado" id="resultado-dado"></div>
+    </div>
+
+    <!-- Cartas Secretas -->
+    <div class="cartas">
+        <h2>Cartas Secretas</h2>
+        <div class="sorteio-cartas controls">
+            <button class="btn-time-a" onclick="sortearCartaTime('a')">Sortear Time A</button>
+            <button class="btn-time-b" onclick="sortearCartaTime('b')">Sortear Time B</button>
+            <button class="btn-hide" onclick="toggleCartaTime('a')">Esconder Time A</button>
+            <button class="btn-hide" onclick="toggleCartaTime('b')">Esconder Time B</button>
+            <button class="btn-reset-cartas" onclick="resetCartasSecretas()">Limpar Cartas</button>
+        </div>
+
+        <div class="cartas-container" id="cartas-exibicao">
+            <!-- Time A -->
+            <div class="carta-box" id="carta-box-a">
+                <h3>Time A</h3>
+                <p><strong>Carta Secreta:</strong></p>
+                <p id="carta-time-a">-</p>
+                <div id="carta-img-a"></div>
+            </div>
+
+            <!-- Time B -->
+            <div class="carta-box" id="carta-box-b">
+                <h3>Time B</h3>
+                <p><strong>Carta Secreta:</strong></p>
+                <p id="carta-time-b">-</p>
+                <div id="carta-img-b"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // === Cronômetro Principal ===
+    let timerMainDisplay = document.getElementById("display-main");
+    let totalSeconds = 0;
+    let intervalMain = null;
+
+    function updateMainDisplay() {
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+        const seconds = String(totalSeconds % 60).padStart(2, "0");
+        timerMainDisplay.textContent = `${minutes}:${seconds}`;
+        atualizarEvento();
+    }
+
+    // === Cronômetro de Acréscimo ===
+    let extraSeconds = 0;
+    let intervalExtra = null;
+    let timerExtraDisplay = document.getElementById("display-extra");
+
+    function updateExtraDisplay() {
+        const minutes = String(Math.floor(extraSeconds / 60)).padStart(2, "0");
+        const seconds = String(extraSeconds % 60).padStart(2, "0");
+        timerExtraDisplay.textContent = `${minutes}:${seconds}`;
+    }
+
+    function startExtraTimer() {
+        if (!intervalExtra && extraSeconds > 0) {
+            intervalExtra = setInterval(() => {
+                if (extraSeconds > 0) {
+                    extraSeconds--;
+                    updateExtraDisplay();
+                } else {
+                    clearInterval(intervalExtra);
+                    intervalExtra = null;
+                }
+            }, 1000);
+        }
+    }
+
+    // === Funções Sincronizadas ===
+    function startTimers() {
+        if (!intervalMain) {
+            intervalMain = setInterval(() => {
+                totalSeconds++;
+                updateMainDisplay();
+            }, 1000);
+        }
+
+        startExtraTimer();
+    }
+
+    function pauseTimers() {
+        clearInterval(intervalMain);
+        intervalMain = null;
+
+        clearInterval(intervalExtra);
+        intervalExtra = null;
+    }
+
+    function resetTimers() {
+        pauseTimers();
+        totalSeconds = 0;
+        extraSeconds = 0;
+        updateMainDisplay();
+        updateExtraDisplay();
+        selecionarTempo('1');
+        document.getElementById("evento-atual").textContent = "Evento Atual: Escalonado";
+        document.getElementById("tipo-evento").innerHTML = "<strong>Tipo:</strong> Entrada progressiva";
+        limparDado();
+    }
+
+    function resetExtraTimer() {
+        pauseTimers();
+        extraSeconds = 0;
+        updateExtraDisplay();
+    }
+
+    function addExtraTime(seconds) {
+        extraSeconds += seconds;
+        updateExtraDisplay();
+        startExtraTimer();
+    }
+
+    // === Sorteio de Dado ===
+    let tipoEvento = document.getElementById("tipo-evento");
+    let resultadoDado = document.getElementById("resultado-dado");
+    let imagemDado = document.getElementById("imagem-dado");
+
+    const opcoesDadoTempo1 = ["x1 sem goleiro", "x2", "x3"];
+    const opcoesDadoTempo2 = ["Gol Áureo", "Gol Duplo"];
+
+    function sortearDado() {
+        const tempoAtual = document.querySelector('.btn-tempo.ativo').id === 'btn-tempo1' ? '1' : '2';
+        const sorteado = (tempoAtual === '1')
+            ? opcoesDadoTempo1[Math.floor(Math.random() * opcoesDadoTempo1.length)]
+            : opcoesDadoTempo2[Math.floor(Math.random() * opcoesDadoTempo2.length)];
+
+        // Limpa antes
+        imagemDado.innerHTML = "";
+        resultadoDado.innerText = "";
+
+        // Cria imagem
+        const img = document.createElement("img");
+        img.src = `imagens/dado/${sorteado.replace(/\s+/g, '-')}.svg`;
+        img.alt = sorteado;
+        img.width = 180;
+        img.height = 180;
+        imagemDado.appendChild(img);
+
+        // Mostra texto
+        resultadoDado.innerText = sorteado;
+
+        // Atualiza evento
+        tipoEvento.textContent = sorteado;
+    }
+
+    function limparDado() {
+        imagemDado.innerHTML = "";
+        resultadoDado.innerText = "";
+        tipoEvento.textContent = "";
+    }
+
+    // === Cartas Secretas ===
+    const cartasDisponiveis = [
+        "Pênalti", "Shoot-out", "Suspensão", "Gol Duplo", "Star Player", "Joker"
+    ];
+
+    const cartaTimeA = document.getElementById("carta-time-a");
+    const cartaTimeB = document.getElementById("carta-time-b");
+    const cartaImgA = document.getElementById("carta-img-a");
+    const cartaImgB = document.getElementById("carta-img-b");
+    const cartaBoxA = document.getElementById("carta-box-a");
+    const cartaBoxB = document.getElementById("carta-box-b");
+
+    let showCartaA = true;
+    let showCartaB = true;
+
+    function sortearCartaTime(time) {
+        const carta = cartasDisponiveis[Math.floor(Math.random() * cartasDisponiveis.length)];
+
+        if (time === "a") {
+            cartaTimeA.textContent = carta;
+            cartaBoxA.style.display = 'block';
+            showCartaA = true;
+
+            cartaImgA.innerHTML = "";
+            const img = document.createElement("img");
+            img.src = `imagens/cartas/${carta.replace(/\s+/g, '-')}.svg`;
+            img.width = 176;
+            img.height = 256;
+            cartaImgA.appendChild(img);
+        } else if (time === "b") {
+            cartaTimeB.textContent = carta;
+            cartaBoxB.style.display = 'block';
+            showCartaB = true;
+
+            cartaImgB.innerHTML = "";
+            const img = document.createElement("img");
+            img.src = `imagens/cartas/${carta.replace(/\s+/g, '-')}.svg`;
+            img.width = 176;
+            img.height = 256;
+            cartaImgB.appendChild(img);
+        }
+    }
+
+    function toggleCartaTime(time) {
+        if (time === "a") {
+            showCartaA = !showCartaA;
+            cartaBoxA.style.display = showCartaA ? 'block' : 'none';
+        } else if (time === "b") {
+            showCartaB = !showCartaB;
+            cartaBoxB.style.display = showCartaB ? 'block' : 'none';
+        }
+    }
+
+    function resetCartasSecretas() {
+        cartaTimeA.textContent = "-";
+        cartaTimeB.textContent = "-";
+        cartaImgA.innerHTML = "";
+        cartaImgB.innerHTML = "";
+
+        if (!showCartaA) cartaBoxA.style.display = 'block';
+        if (!showCartaB) cartaBoxB.style.display = 'block';
+
+        setTimeout(() => {
+            if (!showCartaA) cartaBoxA.style.display = 'none';
+            if (!showCartaB) cartaBoxB.style.display = 'none';
+        }, 10);
+    }
+
+    // === Controle de Tempo ===
+    let tempoSelecionado = "1"; // Padrão: Tempo 1
+
+    function selecionarTempo(tempo) {
+        tempoSelecionado = tempo;
+
+        document.querySelectorAll(".btn-tempo").forEach(btn => btn.classList.remove("ativo"));
+        document.getElementById("btn-tempo" + tempo).classList.add("ativo");
+
+        atualizarEvento();
+    }
+
+    // === Lógica de Eventos e Tempos ===
+    function atualizarEvento() {
+        const tempoMin = Math.floor(totalSeconds / 60);
+
+        if (tempoSelecionado === "1") {
+            if (tempoMin < 5) {
+                document.getElementById("evento-atual").textContent = "Evento Atual: Escalonado";
+                document.getElementById("tipo-evento").innerHTML = "<strong>Tipo:</strong> Entrada progressiva";
+            } else if (tempoMin < 18) {
+                document.getElementById("evento-atual").textContent = "Evento Atual: 7x7";
+                document.getElementById("tipo-evento").innerHTML = "<strong>Tipo:</strong> Jogo completo";
+            } else if (tempoMin < 20) {
+                document.getElementById("evento-atual").textContent = "Evento Atual: Sorteio";
+                document.getElementById("tipo-evento").innerHTML = "<strong>Tipo:</strong> x1, x2 ou x3";
+            }
+
+        } else {
+            if (tempoMin < 38) {
+                document.getElementById("evento-atual").textContent = "Evento Atual: 7x7";
+                document.getElementById("tipo-evento").innerHTML = "<strong>Tipo:</strong> Jogo completo";
+            } else if (tempoMin < 40) {
+                document.getElementById("evento-atual").textContent = "Evento Atual: Final";
+                document.getElementById("tipo-evento").innerHTML = "<strong>Tipo:</strong> Gol duplo ou áureo";
+            } else {
+                document.getElementById("evento-atual").textContent = "Evento Atual: Shoot-Out";
+                document.getElementById("tipo-evento").innerHTML = "<strong>Tipo:</strong> Decisivo";
+            }
+        }
+    }
+
+    // Inicialização
+    function updateMainDisplay() {
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+        const seconds = String(totalSeconds % 60).padStart(2, "0");
+        timerMainDisplay.textContent = `${minutes}:${seconds}`;
+        atualizarEvento();
+    }
+
+    function updateExtraDisplay() {
+        const minutes = String(Math.floor(extraSeconds / 60)).padStart(2, "0");
+        const seconds = String(extraSeconds % 60).padStart(2, "0");
+        timerExtraDisplay.textContent = `${minutes}:${seconds}`;
+    }
+
+    // Inicialização dos displays
+    updateMainDisplay();
+    updateExtraDisplay();
+</script>
+
+</body>
+</html>

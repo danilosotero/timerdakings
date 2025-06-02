@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 176 256">
+  <!-- Generator: Adobe Illustrator 29.5.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 141)  -->
+  <defs>
+    <style>
+      .st0 {
+        font-size: 20.2px;
+      }
+
+      .st0, .st1, .st2, .st3 {
+        fill: #054705;
+        font-family: nebulari-Italic, nebulari;
+        font-style: italic;
+      }
+
+      .st0, .st3 {
+        display: none;
+      }
+
+      .st1 {
+        font-size: 14.9px;
+      }
+
+      .st4 {
+        fill: none;
+        stroke: #054705;
+        stroke-miterlimit: 10;
+        stroke-width: 3px;
+      }
+
+      .st2, .st3 {
+        font-size: 23px;
+      }
+
+      .st5 {
+        fill: lime;
+      }
+    </style>
+  </defs>
+  <rect class="st5" width="176" height="256" rx="8.5" ry="8.5"/>
+  <rect class="st4" x="-30" y="50" width="236" height="156" rx="8.5" ry="8.5" transform="translate(216 40) rotate(90)"/>
+  <text class="st1" transform="translate(58.9 213.9)"><tspan x="0" y="0">CARTA</tspan><tspan x="-11.2" y="15.6">SECRETA</tspan></text>
+  <text class="st3" transform="translate(34.3 111.9)"><tspan x="0" y="0">PENALTI</tspan></text>
+  <text class="st2" transform="translate(42.2 111.9)"><tspan x="0" y="0">JOKER</tspan></text>
+  <text class="st0" transform="translate(18.3 111.1)"><tspan x="0" y="0">SUSPENSAO</tspan></text>
+  <text class="st3" transform="translate(43.1 101.9)"><tspan x="0" y="0">SHOOT</tspan><tspan x="17.3" y="24">OUT</tspan></text>
+  <text class="st3" transform="translate(63.1 101.9)"><tspan x="0" y="0">GOL</tspan><tspan x="-17.3" y="24">DUPLO</tspan></text>
+  <text class="st3" transform="translate(51.7 101.9)"><tspan x="0" y="0">STAR</tspan><tspan x="-15.3" y="24">PLAYER</tspan></text>
+</svg>
